@@ -3,7 +3,7 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 const decompress = require("decompress");
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+// import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -13,7 +13,7 @@ const bucketRegion = process.env.BUCKET_REGION;
 const amazonAccessKey = process.env.AMAZON_ACCESS_KEY;
 const amazonSecretKey = process.env.AMAZON_SECRET_KEY;
 
-const s3 = new S3Client();
+// const s3 = new S3Client();
 const app = express();
 
 app.use(express.json());
@@ -38,8 +38,8 @@ app.post("/", (req, res) => {
   //     "image.jpg"
   //   );
 
-  //   downloadBuildFromUCB(buildURL, "build.zip");
-  uploadBuildToS3();
+  downloadBuildFromUCB(buildURL, "build.zip");
+  // uploadBuildToS3();
 
   res.send("ok");
 });
@@ -100,19 +100,19 @@ function decompressBuildZipFile(fileName) {
   });
 }
 
-async function uploadBuildToS3() {
-  const s3 = S3Client({
-    credentials: {
-      accessKeyId: amazonAccessKey,
-      secretAccessKey: amazonSecretKey,
-      region: bucketRegion,
-    },
-  });
+// async function uploadBuildToS3() {
+//   const s3 = S3Client({
+//     credentials: {
+//       accessKeyId: amazonAccessKey,
+//       secretAccessKey: amazonSecretKey,
+//       region: bucketRegion,
+//     },
+//   });
 
-  const params = {
-    Bucket: bucketName,
-    Key: "",
-    Body: "",
-  };
-  const command = new PutObjectCommand();
-}
+//   const params = {
+//     Bucket: bucketName,
+//     Key: "",
+//     Body: "",
+//   };
+//   const command = new PutObjectCommand();
+// }
