@@ -12,6 +12,7 @@ const unityCloudBuildSignature = process.env.UNITY_CLOUD_BUILD_SIGNATURE;
 
 const DECOMPRESSED_FOLDER_NAME = "decompressed_builds";
 const BUILDS_FOLDER_NAME = "builds";
+const RUNNER_S3_INTERNAL = "s3://runner.shoelacegaming.com/internal";
 var buildNumber;
 var buildTargetName;
 var buildZipFilename;
@@ -114,7 +115,7 @@ function runBatFile(folderName, buildFileName) {
   exec(
     `upload-runner-build.bat ${
       buildTargetName + "-" + buildNumber
-    } ${dir} ${buildTargetName} `,
+    } ${dir} ${buildTargetName} ${RUNNER_S3_INTERNAL}`,
     (err, stdout, stderr) => {
       if (err) {
         console.error(err);
