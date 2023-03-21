@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const decompress = require("decompress");
 // import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import dotenv from "dotenv";
+const dotenv = require("dotenv");
 
 dotenv.config();
 
