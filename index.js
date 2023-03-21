@@ -5,6 +5,7 @@ const path = require("path");
 const decompress = require("decompress");
 const dotenv = require("dotenv");
 const { exec, spawn } = require("node:child_process");
+const { create } = require("domain");
 
 dotenv.config();
 
@@ -26,21 +27,23 @@ app.post("/", (req, res) => {
   console.log("UCB Webhook");
   //   console.log("webhook body", req.body);
 
-  console.log(req.body.buildNumber);
-  console.log(req.body.buildTargetName);
+  var buildNumber = req.body.buildNumber;
+  var buildTargetName = req.body.buildTargetName;
+  var buildZipFilename =
+    req.body.buildTargetName + "-" + req.body.buildNumber + ".zip";
+  console.log(buildNumber + buildTargetName + buildZipFilename);
 
   const buildURL = getBuildURL(req.body);
   console.log("URL ", buildURL);
 
-  let buildZipFilename =
-    req.body.buildTargetName + "-" + req.body.buildNumber + ".zip";
-
-  downloadBuildFromUCB(
-    "https://unsplash.com/photos/Njd1TRaJj7w/download?ixid=MnwxMjA3fDB8MXxhbGx8OHx8fHx8fDJ8fDE2NzgyMDMwMDU&force=true",
-    "image.jpg"
-  );
+  // downloadBuildFromUCB(
+  //   "https://unsplash.com/photos/Njd1TRaJj7w/download?ixid=MnwxMjA3fDB8MXxhbGx8OHx8fHx8fDJ8fDE2NzgyMDMwMDU&force=true",
+  //   "image.jpg"
+  // );
 
   // downloadBuildFromUCB(buildURL, buildZipFilename);
+
+  decompressBuildZipFile("beta4-91.zip");
 
   res.send("ok");
 });
@@ -50,11 +53,6 @@ app.listen(port, () => console.log(`Listening on port ${port}...`));
 
 function getBuildURL(body) {
   try {
-    // console.log(buildZipFilename);
-    // console.log(body.links.artifacts[0].files);
-    // console.log(body.links.artifacts[1].files);
-    // console.log("Length: ", Object.keys(body.links).length);
-
     for (let i = 0; i < body.links.artifacts.length; i++) {
       console.log(i + ": " + body.links.artifacts[i].name);
       if (body.links.artifacts[i].name.localeCompare(".ZIP file") == 0) {
@@ -71,9 +69,7 @@ function getBuildURL(body) {
 }
 
 async function downloadBuildFromUCB(buildURL, buildFileName) {
-  if (!fs.existsSync(BUILDS_FOLDER_NAME)) {
-    fs.mkdirSync(BUILDS_FOLDER_NAME, { recursive: true });
-  }
+  createDir(BUILDS_FOLDER_NAME);
 
   const buildFileStreamPath = path.resolve(__dirname, "builds", buildFileName);
   const writer = fs.createWriteStream(buildFileStreamPath);
@@ -100,6 +96,7 @@ async function downloadBuildFromUCB(buildURL, buildFileName) {
 }
 
 function decompressBuildZipFile(buildFileName) {
+  createDir(DECOMPRESSED_FOLDER_NAME);
   decompress("builds/" + buildFileName, DECOMPRESSED_FOLDER_NAME).then(
     (files) => {
       console.log("decompression done! ");
@@ -128,3 +125,9 @@ function runBatFile(folderName, buildFileName) {
 // exec('"my script.cmd" a b', (err, stdout, stderr) => {
 //   // ...
 // });
+
+function createDir(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
