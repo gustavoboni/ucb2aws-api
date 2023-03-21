@@ -3,17 +3,16 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 const decompress = require("decompress");
-// import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 const dotenv = require("dotenv");
+const { exec, spawn } = require("node:child_process");
 
 dotenv.config();
 
-const bucketName = process.env.BUCKET_NAME;
-const bucketRegion = process.env.BUCKET_REGION;
-const amazonAccessKey = process.env.AMAZON_ACCESS_KEY;
-const amazonSecretKey = process.env.AMAZON_SECRET_KEY;
+const unityCloudBuildSignature = process.env.UNITY_CLOUD_BUILD_SIGNATURE;
 
-// const s3 = new S3Client();
+const DECOMPRESSED_FOLDER_NAME = "decompressed_builds";
+const BUILDS_FOLDER_NAME = "builds";
+
 const app = express();
 
 app.use(express.json());
@@ -27,19 +26,21 @@ app.post("/", (req, res) => {
   console.log("UCB Webhook");
   //   console.log("webhook body", req.body);
 
+  console.log(req.body.buildNumber);
+  console.log(req.body.buildTargetName);
+
   const buildURL = getBuildURL(req.body);
   console.log("URL ", buildURL);
 
   let buildZipFilename =
     req.body.buildTargetName + "-" + req.body.buildNumber + ".zip";
 
-  //   downloadBuildFromUCB(
-  //     "https://unsplash.com/photos/Njd1TRaJj7w/download?ixid=MnwxMjA3fDB8MXxhbGx8OHx8fHx8fDJ8fDE2NzgyMDMwMDU&force=true",
-  //     "image.jpg"
-  //   );
+  downloadBuildFromUCB(
+    "https://unsplash.com/photos/Njd1TRaJj7w/download?ixid=MnwxMjA3fDB8MXxhbGx8OHx8fHx8fDJ8fDE2NzgyMDMwMDU&force=true",
+    "image.jpg"
+  );
 
-  downloadBuildFromUCB(buildURL, "build.zip");
-  // uploadBuildToS3();
+  // downloadBuildFromUCB(buildURL, buildZipFilename);
 
   res.send("ok");
 });
@@ -70,6 +71,10 @@ function getBuildURL(body) {
 }
 
 async function downloadBuildFromUCB(buildURL, buildFileName) {
+  if (!fs.existsSync(BUILDS_FOLDER_NAME)) {
+    fs.mkdirSync(BUILDS_FOLDER_NAME, { recursive: true });
+  }
+
   const buildFileStreamPath = path.resolve(__dirname, "builds", buildFileName);
   const writer = fs.createWriteStream(buildFileStreamPath);
 
@@ -94,25 +99,32 @@ async function downloadBuildFromUCB(buildURL, buildFileName) {
   });
 }
 
-function decompressBuildZipFile(fileName) {
-  decompress("builds/" + fileName, "dist").then((files) => {
-    console.log("done! " + files);
-  });
+function decompressBuildZipFile(buildFileName) {
+  decompress("builds/" + buildFileName, DECOMPRESSED_FOLDER_NAME).then(
+    (files) => {
+      console.log("decompression done! ");
+      runBatFile(DECOMPRESSED_FOLDER_NAME, buildFileName);
+    }
+  );
 }
 
-// async function uploadBuildToS3() {
-//   const s3 = S3Client({
-//     credentials: {
-//       accessKeyId: amazonAccessKey,
-//       secretAccessKey: amazonSecretKey,
-//       region: bucketRegion,
-//     },
-//   });
+function runBatFile(folderName, buildFileName) {
+  const dir = __dirname + "/decompressed_builds/" + buildFileName;
+  console.log(dir);
+  exec("upload-runner-build.bat beta4 ", (err, stdout, stderr) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(stdout);
+  });
+  console.log("This file is " + __filename);
+  console.log("It's located in " + __dirname);
+}
 
-//   const params = {
-//     Bucket: bucketName,
-//     Key: "",
-//     Body: "",
-//   };
-//   const command = new PutObjectCommand();
-// }
+// // Script with spaces in the filename:
+// const bat = spawn('"my script.cmd"', ['a', 'b'], { shell: true });
+// // or:
+// exec('"my script.cmd" a b', (err, stdout, stderr) => {
+//   // ...
+// });

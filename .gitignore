@@ -145,3 +145,4 @@ dist
 
 #builds folder
 builds/
+decompressed_builds/
