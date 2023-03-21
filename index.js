@@ -5,7 +5,6 @@ const path = require("path");
 const decompress = require("decompress");
 const dotenv = require("dotenv");
 const { exec, spawn } = require("node:child_process");
-const { create } = require("domain");
 
 dotenv.config();
 
@@ -13,6 +12,9 @@ const unityCloudBuildSignature = process.env.UNITY_CLOUD_BUILD_SIGNATURE;
 
 const DECOMPRESSED_FOLDER_NAME = "decompressed_builds";
 const BUILDS_FOLDER_NAME = "builds";
+var buildNumber;
+var buildTargetName;
+var buildZipFilename;
 
 const app = express();
 
@@ -27,11 +29,11 @@ app.post("/", (req, res) => {
   console.log("UCB Webhook");
   //   console.log("webhook body", req.body);
 
-  var buildNumber = req.body.buildNumber;
-  var buildTargetName = req.body.buildTargetName;
-  var buildZipFilename =
+  buildNumber = req.body.buildNumber;
+  buildTargetName = req.body.buildTargetName;
+  buildZipFilename =
     req.body.buildTargetName + "-" + req.body.buildNumber + ".zip";
-  console.log(buildNumber + buildTargetName + buildZipFilename);
+  console.log(buildNumber, buildTargetName, buildZipFilename);
 
   const buildURL = getBuildURL(req.body);
   console.log("URL ", buildURL);
@@ -106,17 +108,24 @@ function decompressBuildZipFile(buildFileName) {
 }
 
 function runBatFile(folderName, buildFileName) {
-  const dir = __dirname + "/decompressed_builds/" + buildFileName;
-  console.log(dir);
-  exec("upload-runner-build.bat beta4 ", (err, stdout, stderr) => {
-    if (err) {
-      console.error(err);
-      return;
+  const dir = __dirname + "/" + folderName + "/" + buildTargetName;
+  console.log("Settings", buildTargetName, buildNumber, dir);
+  exec(
+    `upload-runner-build.bat ${
+      buildTargetName + "-" + buildNumber
+    } ${dir} ${buildTargetName} `,
+    (err, stdout, stderr) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      console.log(stdout);
+      //delete files
+      // deleteDir(folderName);
     }
-    console.log(stdout);
-  });
-  console.log("This file is " + __filename);
-  console.log("It's located in " + __dirname);
+  );
+  // console.log("This file is " + __filename);
+  // console.log("It's located in " + __dirname);
 }
 
 // // Script with spaces in the filename:
@@ -130,4 +139,14 @@ function createDir(dir) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
+}
+
+function deleteDir(dir) {
+  fs.rmdir(dir, { recursive: true, force: true }, (err) => {
+    if (err) {
+      return console.log("error occurred in deleting directory", err);
+    }
+
+    console.log("Directory deleted successfully");
+  });
 }
