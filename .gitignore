@@ -144,5 +144,9 @@ dist
 # End of https://www.toptal.com/developers/gitignore/api/node
 
 #builds folder
+<<<<<<< HEAD
 builds/
 decompressed_builds/
+=======
+builds/
+>>>>>>> master
