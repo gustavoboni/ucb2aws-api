@@ -6,7 +6,7 @@ const decompress = require("decompress");
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import dotenv from "dotenv";
 
-doetenv.config();
+dotenv.config();
 
 const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
