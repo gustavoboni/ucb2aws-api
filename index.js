@@ -45,6 +45,7 @@ app.post("/", (req, res) => {
 
   // downloadBuildFromUCB(buildURL, buildZipFilename);
 
+  //uncomment this to test only decompression
   decompressBuildZipFile("beta4-91.zip");
 
   res.send("ok");
@@ -121,7 +122,7 @@ function runBatFile(folderName, buildFileName) {
       }
       console.log(stdout);
       //delete files
-      // deleteDir(folderName);
+      deleteDir(folderName);
     }
   );
   // console.log("This file is " + __filename);
@@ -142,7 +143,7 @@ function createDir(dir) {
 }
 
 function deleteDir(dir) {
-  fs.rmdir(dir, { recursive: true, force: true }, (err) => {
+  fs.rm(dir, { recursive: true, force: true }, (err) => {
     if (err) {
       return console.log("error occurred in deleting directory", err);
     }
