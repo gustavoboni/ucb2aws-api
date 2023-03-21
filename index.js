@@ -18,7 +18,7 @@ const app = express();
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.get("/test", (req, res) => {
   console.log("get ok");
   res.send("get ok");
 });
