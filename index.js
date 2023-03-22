@@ -12,7 +12,8 @@ const unityCloudBuildSignature = process.env.UNITY_CLOUD_BUILD_SIGNATURE;
 
 const DECOMPRESSED_FOLDER_NAME = "decompressed_builds";
 const BUILDS_FOLDER_NAME = "builds";
-const RUNNER_S3_INTERNAL = "s3://runner.shoelacegaming.com/internal";
+// const RUNNER_S3_INTERNAL = "s3://runner.shoelacegaming.com/internal";
+const RUNNER_S3_INTERNAL = "s3://drift-game";
 var buildNumber;
 var buildTargetName;
 var buildZipFilename;
