@@ -44,10 +44,10 @@ app.post("/", (req, res) => {
   //   "image.jpg"
   // );
 
-  downloadBuildFromUCB(buildURL, buildZipFilename);
+  // downloadBuildFromUCB(buildURL, buildZipFilename);
 
   //uncomment this to test only decompression
-  // decompressBuildZipFile("beta4-91.zip");
+  decompressBuildZipFile("beta4-91.zip");
 
   res.send("ok");
 });
@@ -113,7 +113,7 @@ function runBatFile(folderName, buildFileName) {
   const dir = __dirname + "/" + folderName + "/" + buildTargetName;
   console.log("Settings", buildTargetName, buildNumber, dir);
   exec(
-    `upload-runner-build.bat ${
+    `upload-build.sh ${
       buildTargetName + "-" + buildNumber
     } ${dir} ${buildTargetName} ${RUNNER_S3_INTERNAL}`,
     (err, stdout, stderr) => {
