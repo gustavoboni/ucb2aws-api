@@ -1,7 +1,8 @@
 #!/bin/bash
 
 echo -----------------------------------------
-echo Welcome to the build uploader
+echo ----- Welcome to the build uploader -----
+echo ------- Written by Gustavo Boni ---------
 echo -----------------------------------------
 echo Build version is $1
 echo Build path is $2
