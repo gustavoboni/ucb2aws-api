@@ -104,12 +104,15 @@ function decompressBuildZipFile(buildFileName) {
   decompress("builds/" + buildFileName, DECOMPRESSED_FOLDER_NAME).then(
     (files) => {
       console.log("decompression done! ");
-      runBatFile(DECOMPRESSED_FOLDER_NAME, buildFileName);
+      // runBatFile(DECOMPRESSED_FOLDER_NAME);
+      runBatFileLinux(DECOMPRESSED_FOLDER_NAME);
     }
   );
 }
 
-function runBatFile(folderName, buildFileName) {
+function runBatFile(folderName) {
+  // console.log("This file is " + __filename);
+  // console.log("It's located in " + __dirname);
   const dir = __dirname + "/" + folderName + "/" + buildTargetName;
   console.log("Settings", buildTargetName, buildNumber, dir);
   exec(
@@ -122,20 +125,36 @@ function runBatFile(folderName, buildFileName) {
         return;
       }
       console.log(stdout);
-      //delete files
+
       deleteDir(folderName);
     }
   );
-  // console.log("This file is " + __filename);
-  // console.log("It's located in " + __dirname);
 }
 
-// // Script with spaces in the filename:
-// const bat = spawn('"my script.cmd"', ['a', 'b'], { shell: true });
-// // or:
-// exec('"my script.cmd" a b', (err, stdout, stderr) => {
-//   // ...
-// });
+function runBatFileLinux(folderName) {
+  const scriptPath = "./upload-build.sh";
+  const arg1 = buildTargetName + "-" + buildNumber;
+  const arg2 = __dirname + "/" + folderName + "/" + buildTargetName;
+  const arg3 = buildTargetName;
+  const arg4 = RUNNER_S3_INTERNAL;
+  const child = spawn("bash", [scriptPath, arg1, arg2, arg3, arg4]);
+
+  // listen for stdout data from the child process
+  child.stdout.on("data", (data) => {
+    console.log(`stdout: ${data}`);
+  });
+
+  // listen for stderr data from the child process
+  child.stderr.on("data", (data) => {
+    console.error(`stderr: ${data}`);
+  });
+
+  // listen for when the child process exits
+  child.on("close", (code) => {
+    console.log(`child process exited with code ${code}`);
+    deleteDir(folderName);
+  });
+}
 
 function createDir(dir) {
   if (!fs.existsSync(dir)) {
